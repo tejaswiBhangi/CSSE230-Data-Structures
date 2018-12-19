@@ -1,3 +1,4 @@
+//provided by professor to visualize our operations
 package AVLTree;
 
 import static org.junit.Assert.assertFalse;
