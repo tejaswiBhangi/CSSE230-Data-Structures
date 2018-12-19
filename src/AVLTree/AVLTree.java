@@ -124,6 +124,11 @@ public class AVLTree<T extends Comparable<? super T>>  implements Iterable<T> {
 			b.setFalse();
 			return this;
 		}
+/**
+ * Returns either this node if no balances need to be made, or the root node of the balanced subtree
+ * previously rooted at this node
+ * @return balanced subtree rooted at this node
+ */
 		private BinaryNode adjust() {
 			BinaryNode temp = this;
 			if(getLeftHeight()-getRightHeight()>1) {
