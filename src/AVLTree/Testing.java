@@ -1,3 +1,4 @@
+//test cases written by professor for AVLTrees with the exception of testingNonExistentElementRemoval() which was written by me to cover an edge case
 package AVLTree;
 import static org.junit.Assert.*;
 
