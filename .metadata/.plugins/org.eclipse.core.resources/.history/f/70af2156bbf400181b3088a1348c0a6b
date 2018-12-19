@@ -1,0 +1,33 @@
+package BinarySearchTreeDay1;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Stack;
+
+public class TreeIterator implements Iterator {
+	private BinaryNode currentNode;
+	private Stack<Object> stack;
+	public TreeIterator(BinaryNode b) {
+		this.stack = new Stack<>();
+		this.currentNode = b;
+	}
+	
+	public boolean hasNext() {
+		return current < elements.size();
+	}
+
+	public Object next() {
+//		BinaryNode temp = currentNode;
+//		if(currentNode.getLeftChild() != null) {
+//			currentNode = currentNode.getLeftChild();
+//			return temp;
+//		}
+//		if(currentNode.getRightChild()!= null) {
+//			currentNode = currentNode.getRightChild();
+//			return temp;
+//		}
+		
+		
+	
+
+}

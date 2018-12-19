@@ -1,0 +1,170 @@
+package BinarySearchTreeDay1;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Stack;
+
+import BinarySearchTreeDay1.BinarySearchTree.BinaryNode;
+
+public class BinarySearchTree<T extends Comparable<? super T>>  implements Iterable<T> {
+	public BinaryNode root;
+	
+	public BinarySearchTree(){
+		root = null;
+	}
+	
+	public BinarySearchTree(BinaryNode n){
+		root = n;
+	}
+
+	public boolean isEmpty() {
+		return root==null;
+	}
+	
+	public boolean insert(T element) throws IllegalArgumentException{
+		if(element==null) throw new IllegalArgumentException();
+		if(isEmpty()) root = new BinaryNode(element);
+		return root.insert(new BinaryNode(element));
+	}
+	
+	public Iterator<T> iterator() {
+		return new TreeIterator();
+	}
+	
+	
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> temp = new ArrayList<>();
+		if(!isEmpty())root.toArrayList(temp);
+		return temp;
+	}
+	public T[] toArray(){
+		T[] temp = null;
+		toArrayList().toArray(temp);
+		return temp;
+	}
+	public int size() {
+		return isEmpty()? 0: root.getNumberOfChildren();
+	}
+
+	public int height() {
+		
+		return isEmpty()? -1:root.getHeight();
+	}
+	public String toString() {
+		return toArrayList().toString();
+		
+	}
+	
+	public class BinaryNode {
+		private T element;
+		private BinaryNode leftChild;
+		private BinaryNode rightChild;
+		
+		public BinaryNode(T element){
+			this.element = element;
+			this.leftChild = null;
+			this.rightChild = null;		
+		}
+		
+		public boolean insert(BinaryNode b) {
+			int c = b.getElement().compareTo(element);
+			boolean hasRightChild = rightChild!=null;
+			boolean hasLeftChild = leftChild!=null;
+			if(c==1) {
+				if(hasRightChild) {
+					return rightChild.insert(b);
+				}else {
+					rightChild = b;
+					return true;
+				}
+			}
+			if(c==-1) {
+				if(hasLeftChild) {
+					return leftChild.insert(b);
+				}else {
+					leftChild = b;
+					return true;
+				}
+			}
+			return false;
+			
+		}
+
+		public void setLeftChild(BinaryNode leftChild){
+			this.leftChild = leftChild;
+		}
+		
+		public void setRightChild(BinaryNode rightChild){
+			this.rightChild = rightChild;
+		}
+		
+		public BinaryNode getLeftChild(){
+			return leftChild;
+		}
+		
+		public BinaryNode getRightChild(){
+			return rightChild;
+		}
+		
+		public T getElement(){
+			return element;
+		}
+
+		public int getNumberOfChildren() {
+			ArrayList<T> a = new ArrayList<>();
+			toArrayList(a);
+			return a.size();
+		}
+		
+		public int getHeight() {
+			int leftHeight = -1;
+			int rightHeight = -1;
+			if(leftChild!= null) leftHeight = leftChild.getHeight();
+			if(rightChild!= null) rightHeight = rightChild.getHeight();
+			return 1 + (rightHeight>=leftHeight? rightHeight:leftHeight);
+		}
+		public void toArrayList(ArrayList<T> a) {
+			if(leftChild != null) leftChild.toArrayList(a);
+			a.add(element);
+			if(rightChild!=null) rightChild.toArrayList(a);
+		}
+
+
+		public String toString() {
+			ArrayList<T> temp = new ArrayList<>();
+			toArrayList(temp);
+			return temp.toString();
+		}
+	}
+	public class TreeIterator implements Iterator<T> {
+		private Stack<BinaryNode> stack;
+		public TreeIterator() {
+			this.stack = new Stack<>();
+			if(root!=null) {
+			initialize(root);
+			}
+		}
+		private void initialize(BinaryNode node) {
+			stack.push(node);
+			if(node.getLeftChild()!=null) {
+				initialize(node.getLeftChild());
+			}
+		}
+		
+		
+		public boolean hasNext() {
+			return !stack.isEmpty();
+		}
+
+		public T next() {
+			BinaryNode currentNode = stack.peek();
+			if(currentNode.getRightChild()!=null) {
+				initialize(currentNode.getRightChild());
+			}else {
+				stack.pop().getElement();
+			}
+			return currentNode.getElement();
+		}
+}
+}
+

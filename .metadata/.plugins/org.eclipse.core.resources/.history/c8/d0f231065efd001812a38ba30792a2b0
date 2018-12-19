@@ -1,0 +1,276 @@
+package AVLTree;
+
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Stack;
+
+
+public class AVLTree<T extends Comparable<? super T>>  implements Iterable<T> {
+	public BinaryNode root;
+	private int size;
+	private int modCount;
+	
+	public AVLTree(){
+		root = null;
+	}
+	
+	public AVLTree(BinaryNode n){
+		root = n;
+		size = 0;
+	}
+
+	public boolean isEmpty() {
+		return root==null;
+	}
+	
+	public boolean insert(T element) throws IllegalArgumentException {
+		if(element == null) throw new IllegalArgumentException();	
+		BinaryNode nodeToInsert = new BinaryNode(element);
+		MyBoolean b = new MyBoolean();
+		if(isEmpty()) {
+			root = nodeToInsert;
+			size++;
+			modCount++;
+			return b.getValue();
+		}
+		modCount++;
+		root = root.insert(nodeToInsert, b);
+		return b.getValue();
+	}
+	public boolean remove(T element) throws IllegalArgumentException {
+		if(element == null) throw new IllegalArgumentException();
+		if(root==null) return false;
+		MyBoolean b = new MyBoolean();
+		root = root.remove(element, b);
+		if(b.getValue()) {
+			size--;
+			modCount++;
+		}
+		return b.getValue();
+		
+	}
+	public boolean reverse() {
+		if(root==null) return false;
+		root = root.reverse();
+		return true;
+	}
+	
+	public Iterator<T> iterator() {
+		return new PreOrderIterator(modCount);
+	}
+	
+	
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> temp = new ArrayList<>();
+		if(!isEmpty())root.toArrayList(temp);
+		return temp;
+	}
+	public Object[] toArray(){
+		Object[] temp = toArrayList().toArray();
+		return temp;
+	}
+	public int size() {
+		return size;
+	}
+
+	public int height() {
+		
+		return isEmpty()? -1:root.getHeight();
+	}
+	public String toString() {
+		return toArrayList().toString();
+		
+	}
+	public int getRotationCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	public class BinaryNode {
+		private T element;
+		private BinaryNode leftChild;
+		private BinaryNode rightChild;
+		
+		public BinaryNode(T element){
+			this.element = element;
+			this.leftChild = null;
+			this.rightChild = null;		
+		}
+		
+//		public boolean insert(BinaryNode b) {
+//			int c = b.getElement().compareTo(element);
+//			boolean hasRightChild = rightChild!=null;
+//			boolean hasLeftChild = leftChild!=null;
+//			if(c==1) {
+//				if(hasRightChild) {
+//					return rightChild.insert(b);
+//				}else {
+//					rightChild = b;
+//					size++;
+//					return true;
+//				}
+//			}
+//			if(c==-1) {
+//				if(hasLeftChild) {
+//					return leftChild.insert(b);
+//				}else {
+//					leftChild = b;
+//					size++;
+//					return true;
+//				}
+//			}
+//			return false;
+//		}
+		public BinaryNode insert(BinaryNode node, MyBoolean b) {
+			int c = node.element.compareTo(element);
+			boolean hasRightChild = rightChild!=null;
+			boolean hasLeftChild = leftChild!=null;
+			if(c==1) {
+				if(hasRightChild) {
+					rightChild = rightChild.insert(node, b);
+				}else {
+					rightChild = node;
+					size++;
+				}
+				return this;
+			}
+			if(c==-1) {
+				if(hasLeftChild) {
+					leftChild = leftChild.insert(node, b);
+				}else {
+					leftChild = node;
+					size++;
+				}
+				return this;
+			}
+			b.setFalse();
+			return this;
+		}
+		
+		public BinaryNode reverse() {
+			if(rightChild==null && leftChild==null) {
+				return this;
+			}
+			if(leftChild==null) {
+				leftChild = rightChild.reverse();
+				rightChild = null;
+				return this;
+			}
+			if(rightChild==null) {
+				rightChild = leftChild.reverse();
+				leftChild = null;
+				return this;
+			}
+			BinaryNode temp = leftChild;
+			leftChild = rightChild.reverse();
+			rightChild = temp.reverse();
+			return this;
+		}
+
+		public BinaryNode remove(T element, MyBoolean b) {
+			int compareConstant = element.compareTo(this.element);
+			if(rightChild==null && leftChild==null && compareConstant!=0) {
+				b.setFalse();
+				return this;
+			}
+			if(compareConstant == -1) {
+				leftChild = leftChild.remove(element, b);
+				return this;
+			}
+			if(compareConstant == 1) {
+				rightChild = rightChild.remove(element, b);
+				return this;
+			}
+			
+			
+			if(leftChild==null) return rightChild;
+			if(rightChild==null) return leftChild;
+			
+			this.element = leftChild.getRightMostChild().element;
+			leftChild = leftChild.remove(this.element, b);
+			return this;
+
+		}
+		public BinaryNode getRightMostChild() {
+			if(rightChild==null) return this;
+			else return rightChild.getRightMostChild();
+		}
+		public T getElement(){
+			return element;
+		}
+
+		public int getHeight() {
+			int leftHeight = -1;
+			int rightHeight = -1;
+			if(leftChild!= null) leftHeight = leftChild.getHeight();
+			if(rightChild!= null) rightHeight = rightChild.getHeight();
+			return 1 + (rightHeight>=leftHeight? rightHeight:leftHeight);
+		}
+		public void toArrayList(ArrayList<T> a) {
+			if(leftChild != null) leftChild.toArrayList(a);
+			a.add(element);
+			if(rightChild!=null) rightChild.toArrayList(a);
+		}
+
+		public String toString() {
+			ArrayList<T> temp = new ArrayList<>();
+			toArrayList(temp);
+			return temp.toString();
+		}
+		public BinaryNode getLeftChild() {
+			return leftChild==null? null:leftChild;
+		}
+		public BinaryNode getRightChild() {
+			return rightChild==null? null:rightChild;
+		}
+	}
+	public class PreOrderIterator implements Iterator<T> {
+		private Stack<BinaryNode> stack;
+		private int modCountAtConstruction;
+		private BinaryNode lastNode;
+		public PreOrderIterator(int modCount) {
+			this.modCountAtConstruction = modCount;
+			stack = new Stack<>();
+			if(root!=null) {
+				stack.push(root);
+			}
+		}
+		
+		public boolean hasNext() {
+			return !stack.isEmpty();
+		}
+
+		public T next() throws NoSuchElementException, ConcurrentModificationException {
+			if(modCount!=modCountAtConstruction) throw new ConcurrentModificationException();
+			if(!hasNext()) throw new NoSuchElementException();
+			lastNode = stack.pop();
+			if(lastNode.rightChild!=null) stack.push(lastNode.rightChild);
+			if(lastNode.leftChild!=null) stack.push(lastNode.leftChild);
+			return lastNode.element;
+		}
+		public void remove() throws IllegalStateException {
+			if(lastNode==null) throw new IllegalStateException();
+			if(lastNode.rightChild!=null && lastNode.leftChild!=null) {
+				stack.pop();
+				stack.pop();
+				stack.push(lastNode);
+			}
+			AVLTree.this.remove(lastNode.element);
+			lastNode = null;
+			modCountAtConstruction++;	
+		}
+	}
+	public class MyBoolean {
+		private boolean value = true;
+		
+		public boolean getValue() {
+			return value;
+		}
+		public void setFalse() {
+			value = false;
+		}
+	}
+
+}
